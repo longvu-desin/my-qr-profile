@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QR Profile</title>
+  <style>
+    :root{
+      --bg:#06111f; --card:rgba(10,25,45,.82); --card2:rgba(13,34,59,.92);
+      --text:#f4f8ff; --muted:#9db0c8; --accent:#29b6ff; --accent2:#6ee7ff;
+      --line:rgba(255,255,255,.11); --shadow:0 24px 70px rgba(0,0,0,.42);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; min-height:100vh; color:var(--text);
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:
+        radial-gradient(circle at 15% 10%, rgba(41,182,255,.22), transparent 32%),
+        radial-gradient(circle at 85% 15%, rgba(110,231,255,.12), transparent 28%),
+        linear-gradient(145deg,#020711,#07182b 55%,#03101d);
+    }
+    .wrap{width:min(1100px,94%);margin:0 auto;padding:30px 0 60px}
+    .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+    .brand{font-weight:800;letter-spacing:.12em;color:#bcefff}
+    button,.btn{
+      border:1px solid var(--line); background:rgba(255,255,255,.07); color:var(--text);
+      padding:10px 15px;border-radius:12px;cursor:pointer;font-weight:700
+    }
+    button:hover{background:rgba(255,255,255,.12)}
+    .primary{background:linear-gradient(135deg,#078be0,#25c7ff);border:0;color:#00121f;width:100%}
+    .success{background:linear-gradient(135deg,#10b981,#059669);border:0;color:#fff;margin-top:10px;width:100%}
+    .danger{background:rgba(255,70,70,.2);border:1px solid rgba(255,70,70,.4);color:#ff9999}
+    
+    .grid{display:grid;grid-template-columns:1.2fr .8fr;gap:20px}
+    .card{
+      background:linear-gradient(180deg,rgba(12,30,53,.9),rgba(5,17,31,.86));
+      border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);backdrop-filter:blur(16px)
+    }
+    .profile{padding:30px;text-align:center;position:relative}
+    .avatar{width:140px;height:140px;border-radius:50%;object-fit:cover;border:4px solid rgba(110,231,255,.7);margin:0 auto}
+    h1{font-size:32px;margin:15px 0 5px}
+    .hello{color:var(--muted);font-size:15px}
+    .section{margin-top:25px;text-align:left}
+    .section h2{font-size:14px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;color:#8fe9ff}
+    
+    .row{display:flex;justify-content:space-between;gap:15px;padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.03);margin-bottom:8px}
+    .key{color:var(--muted)} .value{text-align:right;word-break:break-word}
+    
+    .gallery-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));gap:12px;margin-top:10px}
+    .gallery-card{border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.03);overflow:hidden;padding:10px}
+    .gallery-img{width:100%;height:120px;object-fit:cover;border-radius:8px;display:block}
+    .gallery-link{display:inline-block;margin-top:6px;font-size:12px;color:var(--accent2);text-decoration:none}
+
+    .editor{padding:24px}
+    label{display:block;font-size:12px;color:var(--muted);margin:12px 0 6px}
+    input,textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;background:#061321;color:var(--text);outline:none}
+    textarea{min-height:70px;resize:vertical}
+    
+    .qrbox{margin-top:20px;padding:16px;border-radius:16px;text-align:center;background:#fff;color:#000}
+    #qrcode img,#qrcode canvas{margin:0 auto!important}
+    .img-edit-card{border:1px dashed var(--line);padding:10px;border-radius:12px;margin-bottom:10px;background:rgba(0,0,0,.2)}
+    
+    @media(max-width:820px){.grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand">QR PROFILE</div>
+  </div>
+
+  <div class="grid">
+    <!-- KHU VỰC HIỂN THỊ PROFILE (GIAO DIỆN MẪU 2) -->
+    <main class="card profile">
+      <img id="viewAvatar" class="avatar" src="assets/profile-image.png" alt="Avatar">
+      <h1 id="viewName">VNL - VN LONG</h1>
+      <div id="viewHello" class="hello">Xin chào! 👋 Mình là Roblox Developer tập sự.</div>
+
+      <div class="section">
+        <h2>Các thông tin cơ bản</h2>
+        <div id="viewInfo"></div>
+      </div>
+
+      <div class="section">
+        <h2>Giới thiệu</h2>
+        <div id="viewBio" class="hello" style="text-align:left;white-space:pre-wrap"></div>
+      </div>
+
+      <div class="section">
+        <h2>Hình ảnh sản phẩm & Dự án</h2>
+        <div id="viewGallery" class="gallery-grid"></div>
+      </div>
+    </main>
+
+    <!-- KHU VỰC CHỈNH SỬA & TẠO QR (MÃ QR RÚT GỌN ẢNH 3) -->
+    <aside class="card editor">
+      <h2 style="margin-top:0">Chỉnh sửa hồ sơ</h2>
+      
+      <label>Tên hiển thị</label>
+      <input id="inName" value="VNL - VN LONG">
+      
+      <label>Lời chào</label>
+      <input id="inHello" value="Xin chào! 👋 Mình là Roblox Developer tập sự.">
+      
+      <label>Ảnh đại diện</label>
+      <input type="file" accept="image/*" onchange="uploadAvatar(event)">
+
+      <label>Thông tin cơ bản (Tên | Giá trị)</label>
+      <textarea id="inInfo">Chuyên môn | Roblox Developer (Luau Script & 3D Asset)
+Sở thích | Lập trình Luau, Blender, Shapr3D, Roleplay Games
+Kỹ năng | Luau, Roblox Studio, Blender 3D modeling, UI Design
+Định hướng | Học tập & Cải thiện kỹ năng gia nhập các dự án Roblox</textarea>
+
+      <label>Giới thiệu</label>
+      <textarea id="inBio">Chào mừng bạn đến với trang Profile cá nhân của mình!
+
+Mình là một Roblox Developer tập sự có đam mê lớn với việc phát triển game trên nền tảng Roblox. Hiện tại, mình đang tập trung vào các mảng:
+- Lập trình Luau: Phát triển logic game, hệ thống tương tác (ProximityPrompt), quản lý dữ liệu (DataStore) và giao diện UI.
+- Thiết kế 3D: Dựng mô hình asset, trang bị và kiến trúc bằng Blender & Shapr3D để đưa vào Roblox Studio.
+
+Mình luôn sẵn sàng học hỏi, trao đổi kinh nghiệm và thử sức với các dự án mới. Hãy kết nối với mình qua các liên kết bên trên nhé!</textarea>
+
+      <div style="margin-top:15px;border-top:1px solid var(--line);padding-top:10px">
+        <label>Danh sách Hình ảnh / Dự án</label>
+        <div id="imgEditList"></div>
+        <button type="button" onclick="addProjItem()" style="width:100%;margin-top:6px">+ Thêm hình ảnh dự án</button>
+      </div>
+
+      <button class="primary" style="margin-top:16px" onclick="saveData()">💾 Lưu & tạo QR</button>
+
+      <!-- KHU VỰC TẠO QR TỐI GIẢN -->
+      <div id="qrArea" class="qrbox" style="display:none">
+        <div id="qrcode"></div>
+        <p style="font-weight:bold;margin:8px 0 2px" id="verLabel">code v1</p>
+        <button class="success" onclick="downloadQR()">📥 Tải QR về máy</button>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+let profile = JSON.parse(localStorage.getItem("MY_QR_PROFILE")) || {
+  name: "VNL - VN LONG",
+  hello: "Xin chào! 👋 Mình là Roblox Developer tập sự.",
+  avatar: "assets/profile-image.png",
+  info: "Chuyên môn | Roblox Developer (Luau Script & 3D Asset)\nSở thích | Lập trình Luau, Blender, Shapr3D, Roleplay Games\nKỹ năng | Luau, Roblox Studio, Blender 3D modeling, UI Design\nĐịnh hướng | Học tập & Cải thiện kỹ năng gia nhập các dự án Roblox",
+  bio: "Chào mừng bạn đến với trang Profile cá nhân của mình!\n\nMình là một Roblox Developer tập sự có đam mê lớn với việc phát triển game trên nền tảng Roblox.\n- Lập trình Luau: Phát triển logic game, hệ thống tương tác (ProximityPrompt), quản lý dữ liệu (DataStore).\n- Thiết kế 3D: Dựng mô hình asset bằng Blender & Shapr3D.",
+  projects: [
+    {
+      img: "assets/profile-image.png",
+      link: "https://discord.gg/Mhtn3Y7sTa",
+      desc: "Server Discord Của Chúng Tôi"
+    }
+  ]
+};
+
+function renderView() {
+  document.getElementById("viewName").textContent = profile.name;
+  document.getElementById("viewHello").textContent = profile.hello;
+  document.getElementById("viewBio").textContent = profile.bio;
+  if(profile.avatar) document.getElementById("viewAvatar").src = profile.avatar;
+
+  // Render Info
+  const vInfo = document.getElementById("viewInfo");
+  vInfo.innerHTML = "";
+  profile.info.split("\n").forEach(line => {
+    if(!line.trim()) return;
+    const parts = line.split("|");
+    const k = parts[0] ? parts[0].trim() : "";
+    const v = parts[1] ? parts[1].trim() : "";
+    vInfo.innerHTML += `<div class="row"><span class="key">${k}</span><span class="value">${v}</span></div>`;
+  });
+
+  // Render Projects
+  const vGal = document.getElementById("viewGallery");
+  vGal.innerHTML = "";
+  if(profile.projects && profile.projects.length > 0) {
+    profile.projects.forEach(p => {
+      let lHtml = p.link ? `<a href="${p.link}" target="_blank" class="gallery-link">🔗 Địa chỉ Discord / Link</a>` : '';
+      vGal.innerHTML += `
+        <div class="gallery-card">
+          ${p.img ? `<img src="${p.img}" class="gallery-img">` : ''}
+          <div style="font-size:13px;font-weight:600;margin-top:6px">${p.desc}</div>
+          ${lHtml}
+        </div>`;
+    });
+  }
+}
+
+function fillInputs() {
+  document.getElementById("inName").value = profile.name;
+  document.getElementById("inHello").value = profile.hello;
+  document.getElementById("inInfo").value = profile.info;
+  document.getElementById("inBio").value = profile.bio;
+
+  const container = document.getElementById("imgEditList");
+  container.innerHTML = "";
+  if(profile.projects) {
+    profile.projects.forEach((p, idx) => addProjItem(p));
+  }
+}
+
+function uploadAvatar(e) {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    profile.avatar = evt.target.result;
+    renderView();
+  };
+  reader.readAsDataURL(file);
+}
+
+function addProjItem(data = {img:'', link:'', desc:''}) {
+  const container = document.getElementById("imgEditList");
+  const idx = container.children.length;
+  const card = document.createElement("div");
+  card.className = "img-edit-card";
+  card.id = `proj_${idx}`;
+  card.innerHTML = `
+    <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+      <b style="font-size:11px">Hình ảnh #${idx + 1}</b>
+      <button type="button" class="danger" style="padding:2px 6px;font-size:10px" onclick="this.parentElement.parentElement.remove()">Xóa</button>
+    </div>
+    <input type="file" accept="image/*" style="font-size:11px;margin-bottom:4px" onchange="uploadProjImg(event, ${idx})">
+    <input id="pLink_${idx}" placeholder="Link Discord / Website..." value="${data.link}" style="margin-bottom:4px">
+    <input id="pDesc_${idx}" placeholder="Tên sản phẩm / Mô tả..." value="${data.desc}">
+  `;
+  container.appendChild(card);
+}
+
+function uploadProjImg(e, idx) {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    if(!profile.projects[idx]) profile.projects[idx] = {};
+    profile.projects[idx].img = evt.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveData() {
+  profile.name = document.getElementById("inName").value;
+  profile.hello = document.getElementById("inHello").value;
+  profile.info = document.getElementById("inInfo").value;
+  profile.bio = document.getElementById("inBio").value;
+
+  // Thu thập danh sách dự án
+  const container = document.getElementById("imgEditList");
+  const newProjs = [];
+  for(let i=0; i < container.children.length; i++) {
+    const card = container.children[i];
+    const idx = card.id.replace("proj_", "");
+    const linkVal = document.getElementById(`pLink_${idx}`) ? document.getElementById(`pLink_${idx}`).value : "";
+    const descVal = document.getElementById(`pDesc_${idx}`) ? document.getElementById(`pDesc_${idx}`).value : "";
+    const oldImg = (profile.projects && profile.projects[i]) ? profile.projects[i].img : "";
+
+    newProjs.push({ img: oldImg, link: linkVal, desc: descVal });
+  }
+  profile.projects = newProjs;
+
+  // 1. Lưu cố định vào bộ nhớ trình duyệt
+  localStorage.setItem("MY_QR_PROFILE", JSON.stringify(profile));
+  renderView();
+
+  // 2. Tạo Mã QR hạt thưa (chỉ truyền link rút gọn)
+  document.getElementById("qrArea").style.display = "block";
+  document.getElementById("qrcode").innerHTML = "";
+
+  const shortUrl = window.location.origin + window.location.pathname;
+
+  new QRCode(document.getElementById("qrcode"), {
+    text: shortUrl,
+    width: 180,
+    height: 180,
+    correctLevel: QRCode.CorrectLevel.L
+  });
+
+  document.getElementById("verLabel").textContent = getVerName();
+}
+
+function getVerName() {
+  let maj = parseInt(localStorage.getItem("QR_VER_MAJ")) || 1;
+  let min = parseInt(localStorage.getItem("QR_VER_MIN")) || 0;
+  return min === 0 ? `code v${maj}` : `code v${maj}.${min}`;
+}
+
+function downloadQR() {
+  const qrc = document.getElementById("qrcode");
+  const img = qrc.querySelector("img") || qrc.querySelector("canvas");
+  if(!img) return;
+
+  const a = document.createElement("a");
+  a.href = img.tagName.toLowerCase() === "canvas" ? img.toDataURL("image/png") : img.src;
+  a.download = getVerName() + ".png";
+  a.click();
+
+  // Tự động nhảy phiên bản (code v1 -> v1.1 ... v1.9 -> v2)
+  let maj = parseInt(localStorage.getItem("QR_VER_MAJ")) || 1;
+  let min = parseInt(localStorage.getItem("QR_VER_MIN")) || 0;
+  min++;
+  if(min > 9) { maj++; min = 0; }
+  localStorage.setItem("QR_VER_MAJ", maj);
+  localStorage.setItem("QR_VER_MIN", min);
+  document.getElementById("verLabel").textContent = getVerName();
+}
+
+// Khởi chạy khi tải trang
+renderView();
+fillInputs();
+</script>
+</body>
+</html>
